@@ -1,0 +1,35 @@
+{
+  "idvSession": {
+    "party": {
+      "partyId": "4c502f1f-e931-4ac7-ae4f-379428b38c0e",
+      "type": {
+        "description": "APPLICANT"
+      },
+      "person": {
+        "personName": {
+          "namePrefixDescription": "MR",
+          "givenName": "SCOTT",
+          "lastName": "PATON"
+        },
+        "birthDate": "1972-02-01"
+      },
+      "contactPoint": {
+        "postalAddress": {
+          "premise": "65",
+          "streetName": "HIGH STREET",
+          "townName": "WESTBURY",
+          "postCodeIdentification": "E16 2SB"
+        },
+        "phoneAddress": {
+          "mobileNumber": "0718273844",
+          "internationalCode": "44"
+        }
+      }
+    }
+  },
+  "amlRiskLevel": "01",
+  "productType": "103",
+  "productSubType": "710",
+  "productKey": "MORTGAGE",
+  "channel": "AGENT"
+}

@@ -1,0 +1,32 @@
+{
+  "idvSession": {
+    "party": {
+      "partyId": "5b698fec-600c-4f5d-86a7-bc5ef65fe455",
+      "type": {
+        "description": "APPLICANT"
+      },
+      "person": {
+        "personName": {
+          "namePrefixDescription": "MR",
+          "givenName": "",
+          "lastName": ""
+        },
+        "birthDate": "1972-02-01"
+      },
+      "contactPoint": {
+        "postalAddress": {
+          "premise": "65",
+          "streetName": "HIGH STREET",
+          "townName": "WESTBURY",
+          "postCodeIdentification": ""
+        }
+
+      }
+    }
+  },
+  "amlRiskLevel": "01",
+  "productType": "103",
+  "productSubType": "710",
+  "productKey": "PCA",
+  "channel": "SANUKMOBILE"
+}

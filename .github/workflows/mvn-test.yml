@@ -1,0 +1,97 @@
+# Workflow to perform local test and publish report
+name: Running Local Tests and Publishing Report
+
+on:
+  workflow_dispatch:
+   inputs:
+    report-name:
+      description: 'Name to identify report'
+      required: true
+      default: 'awsTest'
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: write
+  packages: write
+  checks: write
+  
+env:
+  ENV: shared
+  AWS_ACCOUNT: 590455736492
+  AWS_REGION: eu-west-2
+  S3_BUCKET: s3://sirius-taas-shared
+  HTTPS_PROXY: "http://proxy.shared.sirius.tlzproject.com:80"
+  HTTP_PROXY: "http://proxy.shared.sirius.tlzproject.com:80"
+  NO_PROXY: "172.20.0.0/16,localhost,127.0.0.1,100.64.0.0/10,169.254.169.254,.internal,.eks.amazonaws.com,.sirius.tlzproject.com,.corp,.docdb.amazonaws.com,.cache.amazonaws.com,.kafka.eu-west-2.amazonaws.com,.es.amazonaws.com"
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+    #runs-on: ubuntu-latest
+    runs-on: [sirius, shared, build, large]
+    env:
+      MAVEN_OPTS: "-Dhttp.proxyHost=proxy.shared.sirius.tlzproject.com -Dhttp.proxyPort=80 -Dhttps.proxyHost=proxy.shared.sirius.tlzproject.com -Dhttps.proxyPort=80"
+    container:
+      image: 590455736492.dkr.ecr.eu-west-2.amazonaws.com/docker-maven-build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: /root/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Test
+        run: |
+          export VAULT_ADDR=https://internal-vault.shared.sirius.tlzproject.com
+          vault login -method=aws -path=aws -no-print role=ci-build region=eu-west-2
+
+          export TAAS_TEST_KEY="$(vault kv get -field=taas.test.key secret/app/taas)"
+          export AWS_ACCESS_KEY="$(vault kv get -field=aws.access.key secret/app/taas)"
+          export AWS_SECRET_KEY="$(vault kv get -field=aws.secret.key secret/app/taas)"
+
+          export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain sirius --query authorizationToken --output text)
+          $MVN_COMMAND test -Daws.access.key=$AWS_ACCESS_KEY -Daws.secret.key=$AWS_SECRET_KEY -Dtest.key=$TAAS_TEST_KEY
+          ls -al target
+        env:
+          MVN_COMMAND: "mvn -B -Pci "
+
+      - name: Test Reporter
+        uses: dorny/test-reporter@v1.4.3
+        with:
+          name: Test Results
+          path: "**/surefire-reports/TEST-*.xml"
+          reporter: java-junit
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M')"
+
+      - name: Store test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: tests
+          path: target/reports/cucumber.html
+          
+      - name: Rename file 
+        run: mv target/reports/cucumber.html target/reports/${{ github.event.inputs.report-name }}-${{ steps.date.outputs.date }}.html
+
+      - name: Delete file 
+        run: rm -f target/reports/cucumber.html
+          
+      - name: download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: tests
+      - name: upload to s3    
+        run: |
+          export VAULT_ADDR=https://internal-vault.shared.sirius.tlzproject.com
+          vault login -method=aws -no-print -path=aws role=ci-build region=eu-west-2
+          aws s3 cp target/reports $S3_BUCKET/functional-test --sse aws:kms --sse-kms-key-id 35fbcc75-de14-41a3-813e-ac389cd1a107 --recursive

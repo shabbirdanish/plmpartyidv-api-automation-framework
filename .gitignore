@@ -1,0 +1,7 @@
+/.idea/
+/target
+/*.iml
+/test-output
+/nexus.jks
+/settings.xml
+settings-local.xml

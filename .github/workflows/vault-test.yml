@@ -1,0 +1,32 @@
+name: Simple Vault Reading Test
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+    runs-on: [sirius, shared, build, large]
+    env:
+      MAVEN_OPTS: "-Dhttp.proxyHost=proxy.shared.sirius.tlzproject.com -Dhttp.proxyPort=80 -Dhttps.proxyHost=proxy.shared.sirius.tlzproject.com -Dhttps.proxyPort=80"
+    container:
+      image: 590455736492.dkr.ecr.eu-west-2.amazonaws.com/docker-maven-build
+    steps:
+      - name: Get secrets from Vault
+        id: vault_data
+        run: |
+          export VAULT_ADDR=https://internal-vault.shared.sirius.tlzproject.com
+          vault login -method=aws -path=aws -no-print role=ci-build region=eu-west-2
+
+          TAAS_TEST_KEY="$(vault kv get -field=taas.test.key secret/app/taas)"
+          echo "::add-mask::$TAAS_TEST_KEY"
+          echo TAAS_TEST_KEY=$TAAS_TEST_KEY >> $GITHUB_ENV
+
+      - name: Using secrets in next stage
+        run: |
+          mvn test -Dtaas.key=$TAAS_TEST_KEY

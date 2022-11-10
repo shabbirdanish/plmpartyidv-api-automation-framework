@@ -1,0 +1,38 @@
+{
+  "idvSession": {
+    "party": {
+      "partyId": "714a9887-f1cf-4de9-b983-aa099f4523fc",
+      "type": {
+        "description": "APPLICANT"
+      },
+      "person": {
+        "personName": {
+          "namePrefixDescription": "MR",
+          "givenName": "Andrew",
+          "middleName" :"Jr",
+          "lastName": "PATON"
+        },
+        "birthDate": "1972-02-01"
+      },
+      "contactPoint": {
+        "postalAddress": {
+          "premise": "65",
+          "streetName": "HIGH STREET",
+          "townName": "WESTBURY",
+          "postCodeIdentification": "E16 2SB"
+        },
+        "phoneAddress": {
+          "mobileNumber": "0718273844",
+          "internationalCode": "44"
+        }
+
+
+      }
+    }
+  },
+  "amlRiskLevel": "01",
+  "productType": "06",
+  "productSubType": "710",
+  "productKey": "PCA",
+  "channel": "SANUKMOBILE"
+}

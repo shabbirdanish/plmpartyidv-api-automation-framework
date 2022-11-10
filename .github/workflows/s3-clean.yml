@@ -1,0 +1,48 @@
+#Delete from S3 Recursive
+name: Delete Report From S3
+
+on:
+  workflow_dispatch:
+   inputs:
+    folder-name:
+      description: 'Folder for where reports are kept e.g. functional-test/OneApp'
+      required: true
+      default: 'functional-test/OneApp/Mobile'
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: write
+  packages: write
+  checks: write
+  
+env:
+  ENV: shared
+  AWS_ACCOUNT: 590455736492
+  AWS_REGION: eu-west-2
+  S3_BUCKET: s3://sirius-taas-shared
+  HTTPS_PROXY: "http://proxy.shared.sirius.tlzproject.com:80"
+  HTTP_PROXY: "http://proxy.shared.sirius.tlzproject.com:80"
+  NO_PROXY: "172.20.0.0/16,localhost,127.0.0.1,100.64.0.0/10,169.254.169.254,.internal,.eks.amazonaws.com,.sirius.tlzproject.com,.corp,.docdb.amazonaws.com,.cache.amazonaws.com,.kafka.eu-west-2.amazonaws.com,.es.amazonaws.com"
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+    #runs-on: ubuntu-latest
+    runs-on: [sirius, shared, build, large]
+    env:
+      MAVEN_OPTS: "-Dhttp.proxyHost=proxy.shared.sirius.tlzproject.com -Dhttp.proxyPort=80 -Dhttps.proxyHost=proxy.shared.sirius.tlzproject.com -Dhttps.proxyPort=80"
+    container:
+      image: 590455736492.dkr.ecr.eu-west-2.amazonaws.com/docker-maven-build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Delete from s3    
+        run: |
+          export VAULT_ADDR=https://internal-vault.shared.sirius.tlzproject.com
+          vault login -method=aws -no-print -path=aws role=ci-build region=eu-west-2
+          aws s3 rm $S3_BUCKET/${{ github.event.inputs.folder-name }} --recursive
