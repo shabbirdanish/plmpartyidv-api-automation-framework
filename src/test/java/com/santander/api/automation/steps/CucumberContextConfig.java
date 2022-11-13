@@ -1,9 +1,8 @@
-package com.santander.api.test.steps;
+package com.santander.api.automation.steps;
 
 import com.santander.api.automation.config.ApplicationConfig;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 
 @CucumberContextConfiguration
 

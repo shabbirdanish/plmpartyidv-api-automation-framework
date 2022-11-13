@@ -19,7 +19,20 @@
             <groupId>com.test.santander.automation.framework</groupId>
             <artifactId>nitroapikit</artifactId>
             <version>${nitroapikit.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.20</version>
+        </dependency>
+
+
         <dependency>
             <groupId>com.test.santander.automation.framework</groupId>
             <artifactId>taas-common-utils</artifactId>

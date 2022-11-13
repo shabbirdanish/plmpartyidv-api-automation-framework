@@ -5,8 +5,8 @@ Given A JWT token is generated if it is not present
   @NewApplicant @HappyPath @PostiveScenario
   Scenario: Creating the session of an applicant that is not an existing customer
     When Call INITIATE endpoint with valid payload
-#    Then verify http response with status code <200>
-#    And verify idvSessionId is returned in response
+    Then verify http response with status code <200>
+    And verify idvSessionId is returned in response
 #
 #  @PostiveScenario @NewApplicant
 #  Scenario: Creating the session of an applicant where optional fields are blank initiate api payload
